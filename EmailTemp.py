@@ -32,6 +32,21 @@ def get_email_template(case, **kwargs):
         Best regards,
         Santiago 
         """
+    elif case == 'signiture':
+        return f"""
+        Best regards,
+        Santiago 
+        """
+    elif case == 'cid':
+        return f"""
+
+        Dear {kwargs.get('name', 'Customer')},
+        Please provide your CID number for further assistance.
+        
+
+        Best regards,
+        Santiago 
+        """
     else:
         return "Invalid case."
 
@@ -44,7 +59,9 @@ def main():
         '4': ('invoice_not_received', 'Invoice Not Received'),
         '5': ('advance_billing', 'Advance Billing'),
         '6': ('payment_method', 'Payment Method'),
-        '7': ('exit', 'Exit'),
+        '7': ('signiture', 'Signiture'),
+        '8': ('cid', 'Provide CID'),
+        '9': ('exit', 'Exit'),
     }
     while True:
         print("Select an email template case:")
