@@ -1,21 +1,19 @@
 # Email template cases
 
+import pyperclip
+
 def get_email_template(case, **kwargs):
     if case == 'confirmation_of_payment':
         return f"""
-        Subject: Payment Confirmation
-        
         Dear {kwargs.get('name', 'Customer')},
         
-        We have received your payment of £{kwargs.get('amount', '$0.00')} on {kwargs.get('date', 'N/A')}.
+        We have received your payment of £{kwargs.get('amount', '0.00')}.
         
         Best regards,
         Santiago
         """
     elif case == 'additional_info':
         return f"""
-        Subject: Additional Information Required
-        
         Dear {kwargs.get('name', 'Customer')},
         
         We require some additional information to process your request: {kwargs.get('info_needed', 'N/A')}.
@@ -26,8 +24,6 @@ def get_email_template(case, **kwargs):
         """
     elif case == 'redirect_department':
         return f"""
-        Subject: Redirected to Another Department
-        
         Dear {kwargs.get('name', 'Customer')},
         
         Your inquiry has been forwarded to our {kwargs.get('department', 'relevant')} department.
@@ -72,7 +68,10 @@ def main():
     else:
         kwargs['name'] = input("Recipient name: ")
     print("\nGenerated Email:\n")
-    print(get_email_template(case_key, **kwargs))
+    email_body = get_email_template(case_key, **kwargs)
+    print(email_body)
+    pyperclip.copy(email_body)
+    print("\n(The email body has been copied to your clipboard.)")
 
 # Example usage:
 if __name__ == "__main__":
