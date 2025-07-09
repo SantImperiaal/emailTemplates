@@ -44,34 +44,38 @@ def main():
         '4': ('invoice_not_received', 'Invoice Not Received'),
         '5': ('advance_billing', 'Advance Billing'),
         '6': ('payment_method', 'Payment Method'),
-        # ... add more as needed ...
+        '7': ('exit', 'Exit'),
     }
-    print("Select an email template case:")
-    for key, (_, desc) in cases.items():
-        print(f"{key}. {desc}")
-    choice = input("Enter the number of your choice: ").strip()
-    if choice not in cases:
-        print("Invalid selection.")
-        return
-    case_key, case_desc = cases[choice]
-    kwargs = {}
-    if case_key == 'confirmation_of_payment':
-        kwargs['name'] = input("Recipient name: ")
-        kwargs['amount'] = input("Amount: ")
-    elif case_key == 'additional_info':
-        kwargs['name'] = input("Recipient name: ")
-        kwargs['info_needed'] = input("Information needed: ")
-    elif case_key == 'redirect_department':
-        kwargs['name'] = input("Recipient name: ")
-        kwargs['department'] = input("Department: ")
-    # Add prompts for other cases as needed
-    else:
-        kwargs['name'] = input("Recipient name: ")
-    print("\nGenerated Email:\n")
-    email_body = get_email_template(case_key, **kwargs)
-    print(email_body)
-    pyperclip.copy(email_body)
-    print("\n(The email body has been copied to your clipboard.)")
+    while True:
+        print("Select an email template case:")
+        for key, (_, desc) in cases.items():
+            print(f"{key}. {desc}")
+        choice = input("Enter the number of your choice: ").strip()
+        if choice not in cases:
+            print("Invalid selection.\n")
+            continue
+        case_key, case_desc = cases[choice]
+        if case_key == 'exit':
+            print("Exiting. Goodbye!")
+            break
+        kwargs = {}
+        if case_key == 'confirmation_of_payment':
+            kwargs['name'] = input("Recipient name: ")
+            kwargs['amount'] = input("Amount: ")
+        elif case_key == 'additional_info':
+            kwargs['name'] = input("Recipient name: ")
+            kwargs['info_needed'] = input("Information needed: ")
+        elif case_key == 'redirect_department':
+            kwargs['name'] = input("Recipient name: ")
+            kwargs['department'] = input("Department: ")
+        # Add prompts for other cases as needed
+        else:
+            kwargs['name'] = input("Recipient name: ")
+        print("\nGenerated Email:\n")
+        email_body = get_email_template(case_key, **kwargs)
+        print(email_body)
+        pyperclip.copy(email_body)
+        print("\n(The email body has been copied to your clipboard.)\n")
 
 # Example usage:
 if __name__ == "__main__":
