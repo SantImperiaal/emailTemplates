@@ -47,6 +47,40 @@ def get_email_template(case, **kwargs):
         Best regards,
         Santiago 
         """
+    elif case == 'invoice_not_received':
+        return f"""
+        Dear {kwargs.get('name', 'Customer')},
+        
+        We have not yet received your invoice. Please send it at your earliest convenience so we can proceed.
+        
+        Best regards,
+        Santiago 
+        """
+    elif case == 'advance_billing':
+        return f"""
+        Dear {kwargs.get('name', 'Customer')},
+        
+        This is a reminder regarding your advance billing. Please let us know if you have any questions or concerns.
+        
+        Best regards,
+        Santiago 
+        """
+    elif case == 'payment_method':
+        return f"""
+        Dear {kwargs.get('name', 'Customer')},
+        
+        Please confirm your preferred payment method so we can update our records accordingly.
+        
+        Best regards,
+        Santiago 
+        """
+    elif case == 'cas':
+        return f"""You need to raise a request for instalment using Imperials AskNow portal. Once you submit we will be able to determinate if you eligible or not for it. 
+
+Kind regards 
+
+Santiago 
+"""
     else:
         return "Invalid case."
 
@@ -61,6 +95,8 @@ def main():
         '6': ('payment_method', 'Payment Method'),
         '7': ('signiture', 'Signiture'),
         '8': ('cid', 'Provide CID'),
+        '87': ('forward_it', 'Forward Request to IT'),
+        '88': ('cas', 'CAS Status Request'),
         '9': ('exit', 'Exit'),
     }
     while True:
