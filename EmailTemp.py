@@ -37,6 +37,17 @@ def get_email_template(case, **kwargs):
         Best regards,
         Santiago 
         """
+    
+    elif case == 'refunds_request':
+        return f"""
+        Dear {kwargs.get('name', 'Customer')},
+        In order for us to review and process your refund request, please submit a Student Refund Application request via our ServiceNow portal.
+        Once submitted, please keep a note of your ticket number as this will allow you to track the progress of your request.
+
+        Kind regards 
+
+        Santiago
+        """ 
     elif case == 'cid':
         return f"""
 
@@ -88,6 +99,7 @@ def main():
     cases = {
         '1': ('confirmation_of_payment', 'Confirmation of Payment'),
         '2': ('additional_info', 'Additional Information Required'),
+        '21': ('refunds_request', 'Refunds Request '),
         '3': ('redirect_department', 'Redirect to Another Department'),
         # Add more cases as needed, e.g. from your menu structure
         '4': ('invoice_not_received', 'Invoice Not Received'),
