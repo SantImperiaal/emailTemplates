@@ -1,99 +1,83 @@
 # Email template cases
 
 import pyperclip
+import re
 
 def get_email_template(case, **kwargs):
+    def remove_trailing_brackets(text):
+        # Remove any trailing brackets (of any type) and whitespace at the end of the email
+        return re.sub(r'[\[\]\(\)\{\}]+\s*$', '', text.strip())
+
     if case == 'confirmation_of_payment':
-        return f"""
-        Dear {kwargs.get('name', 'Customer')},
-        
-        We have received your payment of £{kwargs.get('amount', '0.00')}.
-        
-        Best regards,
-        Santiago
-        """
+        email = f"""Dear {kwargs.get('name', 'Customer')},
+
+We have received your payment of £{kwargs.get('amount', '0.00')}.
+
+Best regards,
+Santiago"""
     elif case == 'additional_info':
-        return f"""
-        Dear {kwargs.get('name', 'Customer')},
-        
-        We require some additional information to process your request: {kwargs.get('info_needed', 'N/A')}.
-        Please reply to this email at your earliest convenience.
-        
-        Best regards,
-        Santiago 
-        """
+        email = f"""Dear {kwargs.get('name', 'Customer')},
+
+We require some additional information to process your request: {kwargs.get('info_needed', 'N/A')}.
+Please reply to this email at your earliest convenience.
+
+Best regards,
+Santiago"""
     elif case == 'redirect_department':
-        return f"""
-        Dear {kwargs.get('name', 'Customer')},
-        
-        Your inquiry has been forwarded to our {kwargs.get('department', 'relevant')} department.
-        They will contact you soon regarding your request.
-        
-        Best regards,
-        Santiago 
-        """
+        email = f"""Dear {kwargs.get('name', 'Customer')},
+
+Your inquiry has been forwarded to our {kwargs.get('department', 'relevant')} department.
+They will contact you soon regarding your request.
+
+Best regards,
+Santiago"""
     elif case == 'signiture':
-        return f"""
-        Best regards,
-        Santiago 
-        """
-    
+        email = f"""Best regards,
+Santiago"""
     elif case == 'refunds_request':
-        return f"""
-        Dear {kwargs.get('name', 'Customer')},
-        In order for us to review and process your refund request, please submit a Student Refund Application request via our ServiceNow portal.
-        Once submitted, please keep a note of your ticket number as this will allow you to track the progress of your request.
+        email = f"""Dear {kwargs.get('name', 'Customer')},
+In order for us to review and process your refund request, please submit a Student Refund Application request via our ServiceNow portal.
+Once submitted, please keep a note of your ticket number as this will allow you to track the progress of your request.
 
-        Kind regards 
+Kind regards
 
-        Santiago
-        """ 
+Santiago"""
     elif case == 'cid':
-        return f"""
+        email = f"""Dear {kwargs.get('name', 'Customer')},
+Please provide your CID number for further assistance.
 
-        Dear {kwargs.get('name', 'Customer')},
-        Please provide your CID number for further assistance.
-        
-
-        Best regards,
-        Santiago 
-        """
+Best regards,
+Santiago"""
     elif case == 'invoice_not_received':
-        return f"""
-        Dear {kwargs.get('name', 'Customer')},
-        
-        We have not yet received your invoice. Please send it at your earliest convenience so we can proceed.
-        
-        Best regards,
-        Santiago 
-        """
+        email = f"""Dear {kwargs.get('name', 'Customer')},
+
+We have not yet received your invoice. Please send it at your earliest convenience so we can proceed.
+
+Best regards,
+Santiago"""
     elif case == 'advance_billing':
-        return f"""
-        Dear {kwargs.get('name', 'Customer')},
-        
-        This is a reminder regarding your advance billing. Please let us know if you have any questions or concerns.
-        
-        Best regards,
-        Santiago 
-        """
+        email = f"""Dear {kwargs.get('name', 'Customer')},
+
+This is a reminder regarding your advance billing. Please let us know if you have any questions or concerns.
+
+Best regards,1
+Santiago"""
     elif case == 'payment_method':
-        return f"""
-        Dear {kwargs.get('name', 'Customer')},
-        
-        Please confirm your preferred payment method so we can update our records accordingly.
-        
-        Best regards,
-        Santiago 
-        """
+        email = f"""Dear {kwargs.get('name', 'Customer')},
+
+Please confirm your preferred payment method so we can update our records accordingly.
+
+Best regards,
+Santiago"""
     elif case == 'cas':
-        return f"""You need to raise a request for instalment using Imperials AskNow portal. Once you submit we will be able to determinate if you eligible or not for it. 
+        email = f"""You need to raise a request for instalment using Imperials AskNow portal. Once you submit we will be able to determinate if you eligible or not for it.
 
-Kind regards 
+Kind regards
 
-Santiago 
-"""
+Santiago"""
     else:
         return "Invalid case."
+    return remove_trailing_brackets(email)
 
 def main():
     cases = {
@@ -138,6 +122,9 @@ def main():
             kwargs['name'] = input("Recipient name: ")
         print("\nGenerated Email:\n")
         email_body = get_email_template(case_key, **kwargs)
+        # Remove all types of brackets globally
+        for bracket in ['(', ')', '[', ']', '{', '}']:
+            email_body = email_body.replace(bracket, '')
         print(email_body)
         pyperclip.copy(email_body)
         print("\n(The email body has been copied to your clipboard.)\n")
