@@ -85,7 +85,6 @@ def main():
         '2': ('additional_info', 'Additional Information Required'),
         '21': ('refunds_request', 'Refunds Request '),
         '3': ('redirect_department', 'Redirect to Another Department'),
-        # Add more cases as needed, e.g. from your menu structure
         '4': ('invoice_not_received', 'Invoice Not Received'),
         '5': ('advance_billing', 'Advance Billing'),
         '6': ('payment_method', 'Payment Method'),
@@ -115,7 +114,7 @@ def main():
             kwargs['name'] = input("Recipient name: ")
             kwargs['info_needed'] = input("Information needed: ")
         elif case_key == 'redirect_department':
-            kwargs['name'] = input("Recipient name: ")
+            kwargs['name'] = input("Re8cipient name: ")
             kwargs['department'] = input("Department: ")
         # Add prompts for other cases as needed
         else:
