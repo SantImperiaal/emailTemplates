@@ -12,63 +12,45 @@ def get_email_template(case, **kwargs):
         email = f"""Dear {kwargs.get('name', 'Customer')},
 
 We have received your payment of £{kwargs.get('amount', '0.00')}.
-
-Best regards,
-Santiago"""
+"""
     elif case == 'additional_info':
         email = f"""Dear {kwargs.get('name', 'Customer')},
 
 We require some additional information to process your request: {kwargs.get('info_needed', 'N/A')}.
 Please reply to this email at your earliest convenience.
-
-Best regards,
-Santiago"""
+"""
     elif case == 'redirect_department':
         email = f"""Dear {kwargs.get('name', 'Customer')},
 
 Your inquiry has been forwarded to our {kwargs.get('department', 'relevant')} department.
 They will contact you soon regarding your request.
-
-Best regards,
-Santiago"""
+"""
     elif case == 'signiture':
-        email = f"""Best regards,
-Santiago"""
+        email = ""
     elif case == 'refunds_request':
         email = f"""Dear {kwargs.get('name', 'Customer')},
 In order for us to review and process your refund request, please submit a Student Refund Application request via our ServiceNow portal.
 Once submitted, please keep a note of your ticket number as this will allow you to track the progress of your request.
-
-Kind regards
-
-Santiago"""
+"""
     elif case == 'cid':
         email = f"""Dear {kwargs.get('name', 'Customer')},
 Please provide your CID number for further assistance.
-
-Best regards,
-Santiago"""
+"""
     elif case == 'invoice_not_received':
         email = f"""Dear {kwargs.get('name', 'Customer')},
 
 We have not yet received your invoice. Please send it at your earliest convenience so we can proceed.
-
-Best regards,
-Santiago"""
+"""
     elif case == 'advance_billing':
         email = f"""Dear {kwargs.get('name', 'Customer')},
 
 This is a reminder regarding your advance billing. Please let us know if you have any questions or concerns.
-
-Best regards,1
-Santiago"""
+"""
     elif case == 'payment_method':
         email = f"""Dear {kwargs.get('name', 'Customer')},
 
 Please confirm your preferred payment method so we can update our records accordingly.
-
-Best regards,
-Santiago"""
+"""
     elif case == 'cas':
         email = f"""You need to raise a request for instalment using Imperials AskNow portal. Once you submit we will be able to determinate if you eligible or not for it.
 
