@@ -2,82 +2,62 @@
 
 import pyperclip
 import re
+from folder_suggester import suggest_folder
 
 def get_email_template(case, **kwargs):
-    def remove_trailing_brackets(text):
-        # Remove any trailing brackets (of any type) and whitespace at the end of the email
-        return re.sub(r'[\[\]\(\)\{\}]+\s*$', '', text.strip())
-
-    if case == 'confirmation_of_payment':
-        email = f"""Dear {kwargs.get('name', 'Customer')},
-
-We have received your payment of £{kwargs.get('amount', '0.00')}.
-"""
-    elif case == 'additional_info':
-        email = f"""Dear {kwargs.get('name', 'Customer')},
-
-We require some additional information to process your request: {kwargs.get('info_needed', 'N/A')}.
-Please reply to this email at your earliest convenience.
-"""
-    elif case == 'redirect_department':
-        email = f"""Dear {kwargs.get('name', 'Customer')},
-
-Your inquiry has been forwarded to our {kwargs.get('department', 'relevant')} department.
-They will contact you soon regarding your request.
-"""
-    elif case == 'signiture':
-        email = ""
-    elif case == 'refunds_request':
-        email = f"""Dear {kwargs.get('name', 'Customer')},
+    """Return the email template for the given case."""
+    templates = {
+        'refunds': f"""Dear {kwargs.get('name', 'Customer')},
 In order for us to review and process your refund request, please submit a Student Refund Application request via our ServiceNow portal.
 Once submitted, please keep a note of your ticket number as this will allow you to track the progress of your request.
-"""
-    elif case == 'cid':
-        email = f"""Dear {kwargs.get('name', 'Customer')},
-Please provide your CID number for further assistance.
-"""
-    elif case == 'invoice_not_received':
-        email = f"""Dear {kwargs.get('name', 'Customer')},
-
-We have not yet received your invoice. Please send it at your earliest convenience so we can proceed.
-"""
-    elif case == 'advance_billing':
-        email = f"""Dear {kwargs.get('name', 'Customer')},
-
+""",
+        'deposit': f"""Dear {kwargs.get('name', 'Customer')},
+Thank you for your deposit. If you have any questions, please let us know.
+""",
+        'receipts': f"""Dear {kwargs.get('name', 'Customer')},
+We have received your payment query. Our team will review and respond shortly.
+""",
+        'instalments': f"""Dear {kwargs.get('name', 'Customer')},
+Please provide details regarding your instalment request.
+""",
+        'advance_billing': f"""Dear {kwargs.get('name', 'Customer')},
 This is a reminder regarding your advance billing. Please let us know if you have any questions or concerns.
-"""
-    elif case == 'payment_method':
-        email = f"""Dear {kwargs.get('name', 'Customer')},
-
+""",
+        'confirmation_of_payment': f"""Dear {kwargs.get('name', 'Customer')},
+We have received your payment of £{kwargs.get('amount', '0.00')}.
+""",
+        'payment_methods': f"""Dear {kwargs.get('name', 'Customer')},
 Please confirm your preferred payment method so we can update our records accordingly.
+""",
+        'invoice_not_received': f"""Dear {kwargs.get('name', 'Customer')},
+We have not yet received your invoice. Please send it at your earliest convenience so we can proceed.
+""",
+        'epd': f"""Dear {kwargs.get('name', 'Customer')},
+Your EPD request has been received. We will process it and get back to you soon.
+""",
+        'unknown': f"""Dear {kwargs.get('name', 'Customer')},
+Your request has been received. Please provide more details.
 """
-    elif case == 'cas':
-        email = f"""You need to raise a request for instalment using Imperials AskNow portal. Once you submit we will be able to determinate if you eligible or not for it.
-
-Kind regards
-
-Santiago"""
-    else:
-        return "Invalid case."
-    return remove_trailing_brackets(email)
+    }
+    email = templates.get(case, templates['unknown'])
+    return re.sub(r'[\[\]\(\)\{\}]+\s*$', '', email.strip())
 
 def main():
     cases = {
-        '1': ('confirmation_of_payment', 'Confirmation of Payment'),
-        '2': ('additional_info', 'Additional Information Required'),
-        '21': ('refunds_request', 'Refunds Request '),
-        '3': ('redirect_department', 'Redirect to Another Department'),
-        '4': ('invoice_not_received', 'Invoice Not Received'),
-        '5': ('advance_billing', 'Advance Billing'),
-        '6': ('payment_method', 'Payment Method'),
-        '7': ('signiture', 'Signiture'),
-        '8': ('cid', 'Provide CID'),
-        '87': ('forward_it', 'Forward Request to IT'),
-        '88': ('cas', 'CAS Status Request'),
+        '21': ('refunds', 'Refunds Request'),
+        '22': ('deposit', 'Deposit'),
+        '23': ('receipts', 'Send payment queries'),
+        '24': ('instalments', 'Instalments'),
+        '25': ('advance_billing', 'Advance Billing'),
+        '26': ('confirmation_of_payment', 'Confirmation of Payment'),
+        '27': ('payment_methods', 'Payment Methods'),
+        '28': ('invoice_not_received', 'Invoice Not Received'),
+        '29': ('unknown', '?'),
+        '210': ('epd', 'EPD'),
         '9': ('exit', 'Exit'),
     }
     while True:
-        print("Select an email template case:")
+        print("Select a maintenance case:")
         for key, (_, desc) in cases.items():
             print(f"{key}. {desc}")
         choice = input("Enter the number of your choice: ").strip()
@@ -89,18 +69,9 @@ def main():
             print("Exiting. Goodbye!")
             break
         kwargs = {}
+        kwargs['name'] = input("Recipient name: ")
         if case_key == 'confirmation_of_payment':
-            kwargs['name'] = input("Recipient name: ")
             kwargs['amount'] = input("Amount: ")
-        elif case_key == 'additional_info':
-            kwargs['name'] = input("Recipient name: ")
-            kwargs['info_needed'] = input("Information needed: ")
-        elif case_key == 'redirect_department':
-            kwargs['name'] = input("Re8cipient name: ")
-            kwargs['department'] = input("Department: ")
-        # Add prompts for other cases as needed
-        else:
-            kwargs['name'] = input("Recipient name: ")
         print("\nGenerated Email:\n")
         email_body = get_email_template(case_key, **kwargs)
         # Remove all types of brackets globally
@@ -109,6 +80,8 @@ def main():
         print(email_body)
         pyperclip.copy(email_body)
         print("\n(The email body has been copied to your clipboard.)\n")
+        folder = suggest_folder(email_body)
+        print(f"Suggested folder: {folder}\n")
 
 # Example usage:
 if __name__ == "__main__":
