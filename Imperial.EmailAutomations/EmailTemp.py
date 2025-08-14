@@ -74,7 +74,7 @@ def main():
             kwargs['amount'] = input("Amount: ")
         print("\nGenerated Email:\n")
         email_body = get_email_template(case_key, **kwargs)
-        # Remove all types of brackets globally
+        # Remove all typ6es of brackets globally
         for bracket in ['(', ')', '[', ']', '{', '}']:
             email_body = email_body.replace(bracket, '')
         print(email_body)
