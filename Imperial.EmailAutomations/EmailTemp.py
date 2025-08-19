@@ -7,35 +7,40 @@ from folder_suggester import suggest_folder
 def get_email_template(case, **kwargs):
     """Return the email template for the given case."""
     templates = {
-        'refunds': f"""Dear {kwargs.get('name', 'Customer')},
-In order for us to review and process your refund request, please submit a Student Refund Application request via our ServiceNow portal.
+        'refunds': f"""Dear  {kwargs.get('name', 'Customer')},
+
+In order for us to review and process your refund request, please submit a Student Refund Application (https://servicemgt.service-now.com/ask?id=sc_cat_item&table=sc_cat_item&sys_id=0595da471b4146501533a8a4bd4bcb67) request via our ServiceNow portal.
+
 Once submitted, please keep a note of your ticket number as this will allow you to track the progress of your request.
 """,
-        'deposit': f"""Dear {kwargs.get('name', 'Customer')},
+        'deposit': f"""Dear  {kwargs.get('name', 'Customer')},
 Thank you for your deposit. If you have any questions, please let us know.
 """,
-        'receipts': f"""Dear {kwargs.get('name', 'Customer')},
+        'receipts': f"""Dear  {kwargs.get('name', 'Customer')},
 We have received your payment query. Our team will review and respond shortly.
 """,
-        'instalments': f"""Dear {kwargs.get('name', 'Customer')},
-Please provide details regarding your instalment request.
-""",
-        'advance_billing': f"""Dear {kwargs.get('name', 'Customer')},
+        'instalments': f"""Dear  {kwargs.get('name', 'Customer')},
+You will need to raise a request using:
+Payment in instalments | Study | Imperial College London
+https://www.imperial.ac.uk/study/fees-and-funding/tuition-fees/payment-terms/instalments/
+
+In general, we will have the 1st instalment on 1st Sep/Aug 2025 and 2nd on 5th of January 2026 (Dates may vary depending on your course start date ).""",
+        'advance_billing': f"""Dear  {kwargs.get('name', 'Customer')},
 This is a reminder regarding your advance billing. Please let us know if you have any questions or concerns.
 """,
-        'confirmation_of_payment': f"""Dear {kwargs.get('name', 'Customer')},
+        'confirmation_of_payment': f"""Dear  {kwargs.get('name', 'Customer')},
 We have received your payment of £{kwargs.get('amount', '0.00')}.
 """,
-        'payment_methods': f"""Dear {kwargs.get('name', 'Customer')},
+        'payment_methods': f"""Dear  {kwargs.get('name', 'Customer')},
 Please confirm your preferred payment method so we can update our records accordingly.
 """,
-        'invoice_not_received': f"""Dear {kwargs.get('name', 'Customer')},
+        'invoice_not_received': f"""Dear  {kwargs.get('name', 'Customer')},
 We have not yet received your invoice. Please send it at your earliest convenience so we can proceed.
 """,
-        'epd': f"""Dear {kwargs.get('name', 'Customer')},
+        'epd': f"""Dear  {kwargs.get('name', 'Customer')},
 Your EPD request has been received. We will process it and get back to you soon.
 """,
-        'unknown': f"""Dear {kwargs.get('name', 'Customer')},
+        'unknown': f"""Dear  {kwargs.get('name', 'Customer')},
 Your request has been received. Please provide more details.
 """
     }
