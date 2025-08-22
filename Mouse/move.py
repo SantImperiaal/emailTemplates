@@ -35,4 +35,4 @@ def move_mouse_pattern(duration_minutes=None):
 
 if __name__ == "__main__":
     # Example: move for 10 minutes, or set to None for infinite
-    move_mouse_pattern(duration_minutes=None)
+    move_mouse_pattern(duration_minutes=10)
