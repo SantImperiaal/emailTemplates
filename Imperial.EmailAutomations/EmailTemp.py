@@ -47,7 +47,9 @@ We have received your payment query. Our team will review and respond shortly.
 This is a reminder regarding your advance billing. Please let us know if you have any questions or concerns.
 """,
         'confirmation_of_payment': f"""Dear  {kwargs.get('name', 'Customer')},
-We have received your payment of £{kwargs.get('amount', '0.00')}.
+We have received your payment of £{kwargs.get('amount', '0.00')}. Thank you for your payment.
+If you would like a receipt please contact studentpay.queries@imperial.ac.uk
+
 """,
         'payment_methods': f"""Dear  {kwargs.get('name', 'Customer')},
 Please confirm your preferred payment method so we can update our records accordingly.
@@ -82,6 +84,16 @@ The balance of your tuition fees is the 'Amount Due' quoted in the Payment Sched
     else:
         email = templates.get(case, templates['unknown'])
     return re.sub(r'[\[\]\(\)\{\}]+\s*$', '', email.strip())
+
+def clean_amount_input(prompt):
+    raw = input(prompt)
+    # Remove commas, spaces, and parentheses
+    cleaned = raw.replace(',', '').replace('(', '').replace(')', '').replace(' ', '')
+    try:
+        return float(cleaned)
+    except ValueError:
+        print("Invalid amount. Please enter a valid number.")
+        return clean_amount_input(prompt)
 
 def main():
     cases = {
@@ -122,7 +134,7 @@ def main():
                 kwargs['sponsor'] = 'no'
             calc = input("Would you like to calculate the instalments? (y/n): ").strip().lower()
             if calc == 'y':
-                total = float(input("Enter the total amount: "))
+                total = clean_amount_input("Enter the total amount: ")
                 deposit_paid = input("Has a deposit been paid? (y/n): ").strip().lower()
                 if deposit_paid == 'y':
                     deposit = total * 0.10
@@ -133,7 +145,7 @@ def main():
                     net_total = total - sponsorship
                     first_instalment = net_total * 0.5 - deposit
                     second_instalment = net_total * 0.5
-                    deposit_line = f"Deposit: £{deposit:,.2f}\n" if deposit != 0.0 else ""
+                    deposit_line = f"Deposit (Paid): £{deposit:,.2f}\n " if deposit != 0.0 else ""
                     calc_text = (
                         f"\nCalculation:\n"
                         f"Total: £{total:,.2f}\n"
@@ -165,14 +177,14 @@ def main():
                     sponsor_val = 'yes'
                 else:
                     sponsor_val = 'no'
-                total = float(input("Enter the total amount: "))
+                total = clean_amount_input("Enter the total amount: ")
                 deposit_paid = input("Has a deposit been paid? (y/n): ").strip().lower()
                 if deposit_paid == 'y':
                     deposit = total * 0.10
                 else:
                     deposit = 0.0
                 if sponsor_val == 'yes':
-                    sponsorship = float(input("Enter sponsorship amount: "))
+                    sponsorship = clean_amount_input("Enter sponsorship amount: ")
                     net_total = total - sponsorship
                     first_instalment = net_total * 0.5 - deposit
                     second_instalment = net_total * 0.5
