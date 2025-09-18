@@ -14,7 +14,7 @@ You will need to raise a request using:
 Payment in instalments | Study | Imperial College London
 https://www.imperial.ac.uk/study/fees-and-funding/tuition-fees/payment-terms/instalments/
 
-In general, we will have the 1st instalment on 1st Sep/Aug 2025 and 2nd on 5th of January 2026 (Dates may vary depending on your course start date ).
+In general, we will have the 1st instalment on 1st Sep/Oct 2025 and 2nd on 5th of January 2026 (Dates may vary depending on your course start date ).
 """,
         # Calculation for instalments WITHOUT sponsor
         'instalments_no_sponsor': f"""Dear  {kwargs.get('name', 'Customer')},
@@ -22,14 +22,14 @@ To request to pay in instalments, please visit: Payment in instalments | Study |
 https://www.imperial.ac.uk/study/fees-and-funding/tuition-fees/payment-terms/instalments/ and raise a ticket.
 
 
-In general, we will have the 1st instalment on 1st  Sep/Aug 2025 and 2nd on 5th of January 2026 (Dates may vary depending on your course start date ). 
+In general, we will have the 1st instalment on 1st  Sep/Oct 2025 and 2nd on 5th of January 2026 (Dates may vary depending on your course start date ). 
 """,
         # Calculation for instalments WITH sponsor
         'instalments_with_sponsor': f"""Dear  {kwargs.get('name', 'Customer')},
 To request to pay in instalments, please visit: Payment in instalments | Study | Imperial College London
 https://www.imperial.ac.uk/study/fees-and-funding/tuition-fees/payment-terms/instalments/ and raise a ticket.
 
-In general, we will have the 1st instalment on 1st  Sep/Aug 2025 and 2nd on 5th of January 2026 (Dates may vary depending on your course start date ). 
+In general, we will have the 1st instalment on 1st  Sep/Oct 2025 and 2nd on 5th of January 2026 (Dates may vary depending on your course start date ). 
 """,
         'refunds': f"""Dear  {kwargs.get('name', 'Customer')},
 
@@ -94,6 +94,41 @@ def clean_amount_input(prompt):
     except ValueError:
         print("Invalid amount. Please enter a valid number.")
         return clean_amount_input(prompt)
+
+def calculate_instalments(total, deposit_paid, sponsor, sponsorship=None):
+    """Calculate instalments and return formatted calculation text."""
+    deposit = total * 0.10 if deposit_paid == 'y' else 0.0
+    deposit_status = "(Paid)" if deposit_paid == 'y' else "(Not Paid)"
+    
+    if sponsor == 'y':
+        net_total = total - sponsorship
+        first_instalment = net_total * 0.5 - deposit
+        second_instalment = net_total * 0.5
+        remaining_after_first = net_total - first_instalment - deposit
+        remaining_after_second = net_total - first_instalment - second_instalment - deposit
+        deposit_line = f"Deposit: £{deposit:,.2f} {deposit_status}\n" if deposit != 0.0 else ""
+        calc_text = (
+            f"\nTuition calculation breakdown:\n"
+            f"Total: £{total:,.2f}\n"
+            f"Sponsorship: £{sponsorship:,.2f}\n"
+            f"{deposit_line}"
+            f"1st instalment: £{first_instalment:,.2f} (£{remaining_after_first:,.2f} due after payment)\n"
+            f"2nd instalment: £{second_instalment:,.2f} (£{remaining_after_second:,.2f} due after payment)\n"
+        )
+    else:
+        first_instalment = total * 0.5 - deposit
+        second_instalment = total * 0.5
+        remaining_after_first = total - first_instalment - deposit
+        remaining_after_second = total - first_instalment - second_instalment - deposit
+        deposit_line = f"Deposit: £{deposit:,.2f} {deposit_status}\n" if deposit != 0.0 else ""
+        calc_text = (
+            f"\nTuition calculation breakdown:\n"
+            f"Total: £{total:,.2f}\n"
+            f"{deposit_line}"
+            f"1st instalment: £{first_instalment:,.2f} (£{remaining_after_first:,.2f} due after payment)\n"
+            f"2nd instalment: £{second_instalment:,.2f} (£{remaining_after_second:,.2f} due after payment)\n"
+        )
+    return calc_text
 
 def main():
     cases = {
