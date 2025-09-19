@@ -162,88 +162,30 @@ def main():
         if case_key == 'confirmation_of_payment':
             kwargs['amount'] = input("Amount: ")
         if case_key == 'instalments':
-            sponsor = input("Is there a sponsor? (y/n): ").strip().lower()
-            if sponsor == 'y':
-                kwargs['sponsor'] = 'yes'
-            if sponsor == 'n':
-                kwargs['sponsor'] = 'no'
             calc = input("Would you like to calculate the instalments? (y/n): ").strip().lower()
             if calc == 'y':
                 total = clean_amount_input("Enter the total amount: ")
                 deposit_paid = input("Has a deposit been paid? (y/n): ").strip().lower()
-                if deposit_paid == 'y':
-                    deposit = total * 0.10
-                else:
-                    deposit = 0.0
-                if kwargs['sponsor'] == 'yes':
-                    sponsorship = float(input("Enter sponsorship amount: "))
-                    net_total = total - sponsorship
-                    first_instalment = net_total * 0.5 - deposit
-                    second_instalment = net_total * 0.5
-                    deposit_line = f"Deposit (Paid): £{deposit:,.2f}\n " if deposit != 0.0 else ""
-                    calc_text = (
-                        f"\nCalculation:\n"
-                        f"Total: £{total:,.2f}\n"
-                        f"Sponsorship: £{sponsorship:,.2f}\n"
-                        f"{deposit_line}"
-                        f"1st instalment: £{first_instalment:,.2f}\n"
-                        f"2nd instalment: £{second_instalment:,.2f}\n"
-                    )
-                else:
-                    first_instalment = total * 0.5 - deposit
-                    second_instalment = total * 0.5
-                    deposit_line = f"Deposit: £{deposit:,.2f}\n" if deposit != 0.0 else ""
-                    calc_text = (
-                        f"\nCalculation:\n"
-                        f"Total: £{total:,.2f}\n"
-                        f"{deposit_line}"
-                        f"1st instalment: £{first_instalment:,.2f}\n"
-                        f"2nd instalment: £{second_instalment:,.2f}\n"
-                    )
-                kwargs['calc_text'] = calc_text
-            else:
-                kwargs['calc_text'] = ""
-        elif case_key == 'instalments_approved':
-            # Add calculation to approval confirmation if requested
-            calc = input("Would you like to include the calculation? (y/n): ").strip().lower()
-            if calc == 'y':
                 sponsor = input("Is there a sponsor? (y/n): ").strip().lower()
                 if sponsor == 'y':
-                    sponsor_val = 'yes'
+                    sponsorship = clean_amount_input("Enter sponsorship amount: ")
+                    kwargs['calc_text'] = calculate_instalments(total, deposit_paid, sponsor, sponsorship)
                 else:
-                    sponsor_val = 'no'
+                    kwargs['calc_text'] = calculate_instalments(total, deposit_paid, sponsor)
+            else:
+                kwargs['calc_text'] = ""
+
+        elif case_key == 'instalments_approved':
+            calc = input("Would you like to include the calculation? (y/n): ").strip().lower()
+            if calc == 'y':
                 total = clean_amount_input("Enter the total amount: ")
                 deposit_paid = input("Has a deposit been paid? (y/n): ").strip().lower()
-                if deposit_paid == 'y':
-                    deposit = total * 0.10
-                else:
-                    deposit = 0.0
-                if sponsor_val == 'yes':
+                sponsor = input("Is there a sponsor? (y/n): ").strip().lower()
+                if sponsor == 'y':
                     sponsorship = clean_amount_input("Enter sponsorship amount: ")
-                    net_total = total - sponsorship
-                    first_instalment = net_total * 0.5 - deposit
-                    second_instalment = net_total * 0.5
-                    deposit_line = f"Deposit (10%): £{deposit:,.2f}\n" if deposit != 0.0 else ""
-                    calc_text = (
-                        f"\nCalculation:\n"
-                        f"Total: £{total:,.2f}\n"
-                        f"Sponsorship: £{sponsorship:,.2f}\n"
-                        f"{deposit_line}"
-                        f"1st instalment: £{first_instalment:,.2f}\n"
-                        f"2nd instalment: £{second_instalment:,.2f}\n"
-                    )
+                    kwargs['calc_text'] = calculate_instalments(total, deposit_paid, sponsor, sponsorship)
                 else:
-                    first_instalment = total * 0.5 - deposit
-                    second_instalment = total * 0.5
-                    deposit_line = f"Deposit (10%): £{deposit:,.2f}\n" if deposit != 0.0 else ""
-                    calc_text = (
-                        f"\nCalculation:\n"
-                        f"Total: £{total:,.2f}\n"
-                        f"{deposit_line}"
-                        f"1st instalment: £{first_instalment:,.2f}\n"
-                        f"2nd instalment: £{second_instalment:,.2f}\n"
-                    )
-                kwargs['calc_text'] = calc_text
+                    kwargs['calc_text'] = calculate_instalments(total, deposit_paid, sponsor)
             else:
                 kwargs['calc_text'] = ""
         else:
