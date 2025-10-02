@@ -14,7 +14,9 @@ You will need to raise a request using:
 Payment in instalments | Study | Imperial College London
 https://www.imperial.ac.uk/study/fees-and-funding/tuition-fees/payment-terms/instalments/
 
-In general, we will have the 1st instalment on 1st Sep/Oct 2025 and 2nd on 5th of January 2026 (Dates may vary depending on your course start date ).
+No additional charges will be applied for paying by instalments, however, please note that if you do not pay an instalment by the due date, you might face late payment fees.
+
+In general, we will have the 1st instalment on Sep/Oct 2025 and 2nd on 5th of January 2026 (Dates may vary depending on your course start date ).
 """,
         # Calculation for instalments WITHOUT sponsor
         'instalments_no_sponsor': f"""Dear  {kwargs.get('name', 'Customer')},
