@@ -34,5 +34,14 @@ def move_mouse_pattern(duration_minutes=None):
         print("\nStopped by user.")
 
 if __name__ == "__main__":
-    # Example: move for 10 minutes, or set to None for infinite
-    move_mouse_pattern(duration_minutes=10)
+    # Ask user for duration
+    user_input = input("Enter duration in minutes (or press Enter for infinite): ")
+    if user_input.strip():
+        try:
+            duration = int(user_input)
+        except ValueError:
+            print("Invalid input. Using infinite duration.")
+            duration = None
+    else:
+        duration = None
+    move_mouse_pattern(duration_minutes=duration)
