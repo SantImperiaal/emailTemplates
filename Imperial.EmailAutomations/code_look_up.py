@@ -30,11 +30,11 @@ def get_instalment_date(d2):
 def main():
     print("Enter values for A2, B2, C2, D2, E2, F2")
     A2 = input("A2 (e.g. TFDE or student ID): ")
-    B2 = datetime.strptime(input("B2 (Invoice Due Date YYYY-MM-DD): "), "%Y-%m-%d")
-    C2 = datetime.strptime(input("C2 (Application Date YYYY-MM-DD): "), "%Y-%m-%d")
-    D2 = input("D2 (e.g. 2026-27 Entrant or date YYYY-MM-DD): ")
-    E2 = datetime.strptime(input("E2 (Study End Date YYYY-MM-DD): "), "%Y-%m-%d")
-    F2 = datetime.strptime(input("F2 (Invoice Date YYYY-MM-DD): "), "%Y-%m-%d")
+    B2 = datetime.strptime(input("B2 (Invoice Due Date dd/mm/yyyy): "), "%d/%m/%Y")
+    C2 = datetime.strptime(input("C2 (Application Date dd/mm/yyyy): "), "%d/%m/%Y")
+    D2 = input("D2 (e.g. 2026-27 Entrant or date dd/mm/yyyy): ")
+    E2 = datetime.strptime(input("E2 (Study End Date dd/mm/yyyy): "), "%d/%m/%Y")
+    F2 = datetime.strptime(input("F2 (Invoice Date dd/mm/yyyy): "), "%d/%m/%Y")
 
     if not A2 or not B2 or not C2 or not F2:
         print("")
@@ -56,7 +56,7 @@ def main():
         print("Not eligible - 2026-27 entrant")
         return
 
-    inst_date = get_instalment_date(datetime.strptime(D2, "%Y-%m-%d"))
+    inst_date = get_instalment_date(datetime.strptime(D2, "%d/%m/%Y") if D2 != "2026-27 Entrant" else None)
     b_shifted = edate(B2, 4)
     e_shifted = edate(E2, -6)
 
