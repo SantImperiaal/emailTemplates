@@ -1,96 +1,225 @@
-import pygame
 import sys
-from EmailTemp import get_email_template
+import pygame
 import pyperclip
+from EmailTemp import get_email_template, calculate_instalments
+from folder_suggester import suggest_folder
 
-# Initialize Pygame
 pygame.init()
+SCREEN = pygame.display.set_mode((800, 600))
+pygame.display.set_caption("Email Template Selector")
+FONT = pygame.font.Font(None, 24)
+CLOCK = pygame.time.Clock()
 
-# Constants
-WINDOW_WIDTH = 800
-WINDOW_HEIGHT = 600
-BUTTON_HEIGHT = 40
-BUTTON_MARGIN = 10
-BUTTON_COLOR = (70, 130, 180)
-BUTTON_HOVER_COLOR = (100, 149, 237)
-BACKGROUND_COLOR = (240, 240, 240)
-TEXT_COLOR = (0, 0, 0)
-
+# Simple UI primitives
 class Button:
-    def __init__(self, x, y, width, height, text, action):
-        self.rect = pygame.Rect(x, y, width, height)
+    def __init__(self, rect, text, action):
+        self.rect = pygame.Rect(rect)
         self.text = text
         self.action = action
-        self.is_hovered = False
+    def draw(self, surf):
+        color = (70,130,180) if self.rect.collidepoint(pygame.mouse.get_pos()) else (100,150,200)
+        pygame.draw.rect(surf, color, self.rect, border_radius=6)
+        surf.blit(FONT.render(self.text, True, (255,255,255)), (self.rect.x+8, self.rect.y+6))
+    def handle(self, ev):
+        if ev.type == pygame.MOUSEBUTTONDOWN and self.rect.collidepoint(ev.pos):
+            self.action()
 
-    def draw(self, screen):
-        color = BUTTON_HOVER_COLOR if self.is_hovered else BUTTON_COLOR
-        pygame.draw.rect(screen, color, self.rect, border_radius=5)
-        
-        font = pygame.font.Font(None, 24)
-        text_surface = font.render(self.text, True, (255, 255, 255))
-        text_rect = text_surface.get_rect(center=self.rect.center)
-        screen.blit(text_surface, text_rect)
+class TextInput:
+    def __init__(self, rect, text=""):
+        self.rect = pygame.Rect(rect)
+        self.text = text
+        self.active = False
+    def draw(self, surf):
+        pygame.draw.rect(surf, (255,255,255), self.rect)
+        pygame.draw.rect(surf, (120,120,120), self.rect, 2)
+        surf.blit(FONT.render(self.text or "", True, (0,0,0)), (self.rect.x+6, self.rect.y+6))
+    def handle(self, ev):
+        if ev.type == pygame.MOUSEBUTTONDOWN:
+            self.active = self.rect.collidepoint(ev.pos)
+        if ev.type == pygame.KEYDOWN and self.active:
+            if ev.key == pygame.K_BACKSPACE:
+                self.text = self.text[:-1]
+            elif ev.key == pygame.K_RETURN:
+                self.active = False
+            else:
+                self.text += ev.unicode
+
+# Cases mapping (keys used by get_email_template)
+TEMPLATES = [
+    ("Refunds Request", "refunds"),
+    ("Deposit", "deposit"),
+    ("Receipts", "receipts"),
+    ("Instalments", "instalments"),
+    ("Advance Billing", "advance_billing"),
+    ("Confirmation of Payment", "confirmation_of_payment"),
+    ("Payment Methods", "payment_methods"),
+    ("Invoice Not Received", "invoice_not_received"),
+    ("EPD", "epd"),
+    ("Instalments Approved", "instalments_approved")
+]
+
+def draw_text_block(lines, x, y, surf):
+    for i, line in enumerate(lines):
+        surf.blit(FONT.render(line, True, (0,0,0)), (x, y + i*22))
 
 def main():
-    screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-    pygame.display.set_caption("Email Template Selector")
+    state = "menu"
+    selected_case = None
+    message = ""
+    # inputs used in detail screen
+    inp_name = TextInput((320, 120, 320, 30))
+    inp_amount = TextInput((320, 170, 200, 30))
+    inp_total = TextInput((320, 220, 200, 30))
+    inp_sponsorship = TextInput((320, 320, 200, 30))
+    include_calc = False
+    deposit_paid = False
+    sponsor_yes = False
 
-    # Define common email templates
-    templates = [
-        ("Refunds Request", "refunds"),
-        ("Deposit", "deposit"),
-        ("Instalments", "instalments"),
-        ("Confirmations of Payment", "confirmation_of_payment"),
-        ("Payment Methods", "payment_methods"),
-        ("EPD", "epd")
-    ]
-
-    # Create buttons
     buttons = []
-    for i, (text, template_key) in enumerate(templates):
-        y_pos = 50 + (BUTTON_HEIGHT + BUTTON_MARGIN) * i
-        btn = Button(
-            WINDOW_WIDTH // 4,
-            y_pos,
-            WINDOW_WIDTH // 2,
-            BUTTON_HEIGHT,
-            text,
-            lambda k=template_key: handle_template_selection(k)
-        )
+    for i, (label, key) in enumerate(TEMPLATES):
+        btn = Button((50, 40 + i*48, 240, 40), label, lambda k=key: select_case(k))
         buttons.append(btn)
 
-    running = True
-    while running:
-        screen.fill(BACKGROUND_COLOR)
+    back_btn = Button((50, 520, 120, 40), "Back", lambda: switch_to_menu())
+    submit_btn = Button((620, 520, 120, 40), "Generate", lambda: submit())
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            
-            mouse_pos = pygame.mouse.get_pos()
-            
-            if event.type == pygame.MOUSEMOTION:
-                for btn in buttons:
-                    btn.is_hovered = btn.rect.collidepoint(mouse_pos)
-            
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                for btn in buttons:
-                    if btn.rect.collidepoint(mouse_pos):
-                        btn.action()
+    def select_case(key):
+        nonlocal state, selected_case, message, include_calc, deposit_paid, sponsor_yes
+        selected_case = key
+        state = "details"
+        message = ""
+        include_calc = False
+        deposit_paid = False
+        sponsor_yes = False
+        inp_name.text = ""
+        inp_amount.text = ""
+        inp_total.text = ""
+        inp_sponsorship.text = ""
 
-        # Draw buttons
-        for btn in buttons:
-            btn.draw(screen)
+    def switch_to_menu():
+        nonlocal state, message
+        state = "menu"
+        message = ""
+
+    def submit():
+        nonlocal message, state
+        kwargs = {}
+        name = inp_name.text.strip() or "Customer"
+        kwargs['name'] = name
+        # confirmation of payment needs amount
+        if selected_case == "confirmation_of_payment":
+            amt = inp_amount.text.strip()
+            kwargs['amount'] = amt or "0.00"
+        # instalments handling
+        if selected_case in ("instalments", "instalments_approved"):
+            if include_calc:
+                try:
+                    total = float(inp_total.text.replace(",", "") or "0")
+                except ValueError:
+                    message = "Invalid total amount"
+                    return
+                dep_flag = 'y' if deposit_paid else 'n'
+                sponsor_flag = 'y' if sponsor_yes else 'n'
+                sponsorship = 0.0
+                if sponsor_yes:
+                    try:
+                        sponsorship = float(inp_sponsorship.text.replace(",", "") or "0")
+                    except ValueError:
+                        message = "Invalid sponsorship amount"
+                        return
+                kwargs['calc_text'] = calculate_instalments(total, dep_flag, sponsor_flag, sponsorship) if sponsor_yes else calculate_instalments(total, dep_flag, sponsor_flag)
+                kwargs['sponsor'] = 'yes' if sponsor_yes else 'no'
+        # generate email
+        email_body = get_email_template(selected_case, **kwargs)
+        # append calc_text if present
+        if kwargs.get('calc_text'):
+            email_body += kwargs['calc_text']
+        # strip brackets like original
+        for b in '()[]{}':
+            email_body = email_body.replace(b, '')
+        pyperclip.copy(email_body)
+        # folder suggestion
+        try:
+            folder = suggest_folder(email_body)
+        except Exception:
+            folder = "n/a"
+        message = "Email copied to clipboard. Suggested folder: " + folder
+        state = "done"
+
+    while True:
+        for ev in pygame.event.get():
+            if ev.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if state == "menu":
+                for b in buttons:
+                    b.handle(ev)
+            elif state == "details":
+                back_btn.handle(ev)
+                submit_btn.handle(ev)
+                inp_name.handle(ev)
+                if selected_case == "confirmation_of_payment":
+                    inp_amount.handle(ev)
+                if selected_case in ("instalments", "instalments_approved"):
+                    inp_total.handle(ev)
+                    inp_sponsorship.handle(ev)
+                if ev.type == pygame.KEYDOWN:
+                    if ev.key == pygame.K_TAB:
+                        # simple tab: toggle focus order
+                        # not full implementation, keep minimal
+                        pass
+            elif state == "done":
+                back_btn.handle(ev)
+                if ev.type == pygame.KEYDOWN and ev.key == pygame.K_RETURN:
+                    switch_to_menu()
+
+            # handle clicks for small toggles (deposit/sponsor/include calc)
+            if state == "details" and ev.type == pygame.MOUSEBUTTONDOWN:
+                mx,my = ev.pos
+                # deposit toggle
+                if 550 <= mx <= 740 and 220 <= my <= 252 and selected_case in ("instalments","instalments_approved"):
+                    deposit_paid = not deposit_paid
+                # sponsor toggle
+                if 550 <= mx <= 740 and 270 <= my <= 302 and selected_case in ("instalments","instalments_approved"):
+                    sponsor_yes = not sponsor_yes
+                # include calc toggle
+                if 550 <= mx <= 740 and 320 <= my <= 352 and selected_case in ("instalments","instalments_approved"):
+                    include_calc = not include_calc
+
+        SCREEN.fill((240,240,240))
+        if state == "menu":
+            SCREEN.blit(FONT.render("Select template:", True, (0,0,0)), (50,10))
+            for b in buttons:
+                b.draw(SCREEN)
+        elif state == "details":
+            SCREEN.blit(FONT.render(f"Selected: {selected_case}", True, (0,0,0)), (50,10))
+            SCREEN.blit(FONT.render("Recipient name:", True, (0,0,0)), (160,125))
+            inp_name.draw(SCREEN)
+            y = 170
+            if selected_case == "confirmation_of_payment":
+                SCREEN.blit(FONT.render("Amount (e.g. 1200.00):", True, (0,0,0)), (140,175))
+                inp_amount.draw(SCREEN)
+            if selected_case in ("instalments","instalments_approved"):
+                SCREEN.blit(FONT.render("Include calculation (click box):", True, (0,0,0)), (320,295))
+                SCREEN.blit(FONT.render("Total amount:", True, (0,0,0)), (220,225))
+                inp_total.draw(SCREEN)
+                # deposit toggle
+                SCREEN.blit(FONT.render(f"Deposit paid: [{'X' if deposit_paid else ' '}] (click to toggle)", True, (0,0,0)), (320,225))
+                # sponsor toggle and sponsorship input
+                SCREEN.blit(FONT.render(f"Sponsor present: [{'X' if sponsor_yes else ' '}] (click to toggle)", True, (0,0,0)), (320,275))
+                SCREEN.blit(FONT.render("Sponsorship amount:", True, (0,0,0)), (170,325))
+                inp_sponsorship.draw(SCREEN)
+                SCREEN.blit(FONT.render(f"[{'X' if include_calc else ' '}] Click to include calc", True, (0,0,0)), (550,320))
+            back_btn.draw(SCREEN)
+            submit_btn.draw(SCREEN)
+            if message:
+                draw_text_block([message], 320, 420, SCREEN)
+        elif state == "done":
+            draw_text_block(["Done.", message, "Press Enter or Back to return."], 50, 100, SCREEN)
+            back_btn.draw(SCREEN)
 
         pygame.display.flip()
-
-    pygame.quit()
-
-def handle_template_selection(template_key):
-    email_body = get_email_template(template_key, name="Customer")
-    pyperclip.copy(email_body)
-    print(f"Template '{template_key}' copied to clipboard!")
+        CLOCK.tick(30)
 
 if __name__ == "__main__":
     main()

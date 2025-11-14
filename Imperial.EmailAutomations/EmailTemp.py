@@ -6,7 +6,14 @@ from folder_suggester import suggest_folder
 
 def get_email_template(case, **kwargs):
     """Return the email template for the given case."""
-    sponsor = kwargs.get('sponsor', '').strip().lower()
+    # support 'yes'/'no' strings, True/False booleans or None
+    sponsor_raw = kwargs.get('sponsor', None)
+    if isinstance(sponsor_raw, bool):
+        sponsor = 'yes' if sponsor_raw else 'no'
+    elif isinstance(sponsor_raw, str):
+        sponsor = sponsor_raw.strip().lower()
+    else:
+        sponsor = ''
     templates = {
         # General information about instalments (no calculation)
         'instalments_info': f"""Dear  {kwargs.get('name', 'Customer')},
@@ -98,11 +105,24 @@ def clean_amount_input(prompt):
         return clean_amount_input(prompt)
 
 def calculate_instalments(total, deposit_paid, sponsor, sponsorship=None):
-    """Calculate instalments and return formatted calculation text."""
-    deposit = total * 0.10 if deposit_paid == 'y' else 0.0
-    deposit_status = "(Paid)" if deposit_paid == 'y' else "(Not Paid)"
+    """Calculate instalments and return formatted calculation text.
+    deposit_paid may be 'y'/'n' or boolean; sponsor may be 'y'/'n' or boolean.
+    sponsorship should be numeric (0.0 default).
+    """
+    # normalize flags (accept 'y'/'n' or True/False)
+    if isinstance(deposit_paid, bool):
+        deposit_flag = 'y' if deposit_paid else 'n'
+    else:
+        deposit_flag = str(deposit_paid).strip().lower()
+    if isinstance(sponsor, bool):
+        sponsor_flag = 'y' if sponsor else 'n'
+    else:
+        sponsor_flag = str(sponsor).strip().lower()
+
+    deposit = total * 0.10 if deposit_flag == 'y' else 0.0
+    deposit_status = "(Paid)" if deposit_flag == 'y' else "(Not Paid)"
     
-    if sponsor == 'y':
+    if sponsor_flag == 'y':
         net_total = total - sponsorship
         first_instalment = net_total * 0.5 - deposit
         second_instalment = net_total * 0.5
