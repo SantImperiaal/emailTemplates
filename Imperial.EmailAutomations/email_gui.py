@@ -29,20 +29,50 @@ class TextInput:
         self.rect = pygame.Rect(rect)
         self.text = text
         self.active = False
+
     def draw(self, surf):
-        pygame.draw.rect(surf, (255,255,255), self.rect)
+        bg = (255,255,255) if self.active else (240,240,240)
+        pygame.draw.rect(surf, bg, self.rect)
         pygame.draw.rect(surf, (120,120,120), self.rect, 2)
-        surf.blit(FONT.render(self.text or "", True, (0,0,0)), (self.rect.x+6, self.rect.y+6))
+        txt_surf = FONT.render(self.text or "", True, (0,0,0))
+        surf.blit(txt_surf, (self.rect.x+6, self.rect.y+6))
+        # caret
+        if self.active:
+            caret_x = self.rect.x + 6 + txt_surf.get_width() + 1
+            if (pygame.time.get_ticks() // 500) % 2 == 0:
+                pygame.draw.rect(surf, (0,0,0), (caret_x, self.rect.y+6, 2, FONT.get_height()))
+
     def handle(self, ev):
+        # mouse: set focus
         if ev.type == pygame.MOUSEBUTTONDOWN:
+            was_active = self.active
             self.active = self.rect.collidepoint(ev.pos)
+            if self.active and not was_active:
+                try:
+                    pygame.key.start_text_input()
+                except Exception:
+                    pass
+            if not self.active and was_active:
+                try:
+                    pygame.key.stop_text_input()
+                except Exception:
+                    pass
+
+        # text input (preferred) for characters
+        if ev.type == pygame.TEXTINPUT and self.active:
+            self.text += ev.text
+
+        # fallback for special keys
         if ev.type == pygame.KEYDOWN and self.active:
             if ev.key == pygame.K_BACKSPACE:
                 self.text = self.text[:-1]
             elif ev.key == pygame.K_RETURN:
                 self.active = False
-            else:
-                self.text += ev.unicode
+                try:
+                    pygame.key.stop_text_input()
+                except Exception:
+                    pass
+            # ignore other control keys here
 
 # Cases mapping (keys used by get_email_template)
 TEMPLATES = [
